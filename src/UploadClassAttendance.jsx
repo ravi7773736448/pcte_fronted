@@ -4,10 +4,10 @@ export default function UploadClassAttendance() {
   const [lectures, setLectures] = useState([]);
   const [classes, setClasses] = useState([]);
   const [selectedLecture, setSelectedLecture] = useState("");
-  const [attendance, setAttendance] = useState({}); // classId -> boolean
+  const [attendance, setAttendance] = useState({});
   const [loadingClasses, setLoadingClasses] = useState(false);
 
-  // Fetch lectures once on mount
+  // Fetch lectures
   useEffect(() => {
     fetch("http://localhost:5000/api/lectures")
       .then((res) => res.json())
@@ -15,7 +15,7 @@ export default function UploadClassAttendance() {
       .catch(console.error);
   }, []);
 
-  // Fetch classes when selectedLecture changes
+  // Fetch classes when a lecture is selected
   useEffect(() => {
     if (!selectedLecture) {
       setClasses([]);
@@ -24,7 +24,6 @@ export default function UploadClassAttendance() {
     }
 
     setLoadingClasses(true);
-    // Fetch classes excluding those already marked attended for this lecture
     fetch(`http://localhost:5000/api/classes?excludeAttendedForLecture=${selectedLecture}`)
       .then((res) => res.json())
       .then((data) => {
@@ -72,12 +71,9 @@ export default function UploadClassAttendance() {
       .then((res) => {
         if (res.ok) {
           alert("Attendance marked successfully!");
-
-          // Remove attended classes from local state
           setClasses((prevClasses) =>
             prevClasses.filter((cls) => !attendedClasses.includes(cls._id))
           );
-
           setAttendance({});
         } else {
           alert("Failed to submit.");
@@ -87,58 +83,72 @@ export default function UploadClassAttendance() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">Upload Class Attendance</h1>
+    <div className="min-h-screen bg-white px-4 sm:px-6 lg:px-10 pt-24 md:pt-12 pb-10">
+      <div className="max-w-3xl mx-auto">
+        <h1 className="text-3xl md:text-4xl font-bold mb-10 text-center text-red-700">
+          Upload Class Attendance
+        </h1>
 
-      {/* Lecture Dropdown */}
-      <div className="mb-4">
-        <label className="font-semibold block mb-1">Select Lecture</label>
-        <select
-          className="w-full p-2 border rounded"
-          value={selectedLecture}
-          onChange={(e) => setSelectedLecture(e.target.value)}
-        >
-          <option value="">-- Select Lecture --</option>
-          {lectures.map((lec) => (
-            <option key={lec._id} value={lec._id}>
-              {lec.topic} - {lec.class}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Classes List */}
-      <div>
-        <label className="font-semibold block mb-2">Mark Classes Attended</label>
-        {loadingClasses ? (
-          <p>Loading classes...</p>
-        ) : classes.length === 0 ? (
-          <p>No classes to mark attendance for.</p>
-        ) : (
-          <ul className="grid grid-cols-2 gap-2">
-            {classes.map((cls) => (
-              <li key={cls._id} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id={`cls-${cls._id}`}
-                  checked={attendance[cls._id] || false}
-                  onChange={() => toggleClassAttendance(cls._id)}
-                />
-                <label htmlFor={`cls-${cls._id}`}>{cls.name}</label>
-              </li>
+        {/* Lecture Dropdown */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Select Lecture
+          </label>
+          <select
+            className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
+            value={selectedLecture}
+            onChange={(e) => setSelectedLecture(e.target.value)}
+          >
+            <option value="">-- Select Lecture --</option>
+            {lectures.map((lec) => (
+              <option key={lec._id} value={lec._id}>
+                {lec.topic} - {lec.class}
+              </option>
             ))}
-          </ul>
-        )}
-      </div>
+          </select>
+        </div>
 
-      {/* Submit */}
-      <button
-        onClick={submitAttendance}
-        className="mt-6 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-        disabled={loadingClasses || classes.length === 0}
-      >
-        Submit Attendance
-      </button>
+        {/* Class Attendance List */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Mark Classes Attended
+          </label>
+
+          {loadingClasses ? (
+            <p className="text-gray-500">Loading classes...</p>
+          ) : classes.length === 0 ? (
+            <p className="text-gray-500">No classes to mark attendance for.</p>
+          ) : (
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {classes.map((cls) => (
+                <li key={cls._id} className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id={`cls-${cls._id}`}
+                    checked={attendance[cls._id] || false}
+                    onChange={() => toggleClassAttendance(cls._id)}
+                    className="h-4 w-4 text-red-600 focus:ring-red-500"
+                  />
+                  <label htmlFor={`cls-${cls._id}`} className="text-gray-800">
+                    {cls.name}
+                  </label>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Submit Button */}
+        <div className="mt-8 text-center">
+          <button
+            onClick={submitAttendance}
+            disabled={loadingClasses || classes.length === 0}
+            className="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
+          >
+            Submit Attendance
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

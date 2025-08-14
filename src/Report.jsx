@@ -25,7 +25,6 @@ export default function Report() {
       return;
     }
 
-    // Map data to required Excel columns
     const formattedData = lectures.map((lec) => ({
       Teacher: lec.teacher || "",
       Venue: lec.venue || "",
@@ -39,12 +38,10 @@ export default function Report() {
       Topic: lec.topic || "",
     }));
 
-    // Create worksheet and workbook
     const worksheet = XLSX.utils.json_to_sheet(formattedData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Lectures");
 
-    // Write workbook and trigger download
     const wbout = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
     saveAs(
       new Blob([wbout], { type: "application/octet-stream" }),
@@ -53,57 +50,79 @@ export default function Report() {
   };
 
   if (loading) {
-    return <p className="p-6 text-red-700 font-bold">Loading lectures...</p>;
+    return (
+      <p className="p-6 text-center text-red-700 font-bold text-lg">
+        Loading lectures...
+      </p>
+    );
   }
 
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-6 text-red-700">Lecture Reports</h1>
-      <button
-        onClick={downloadExcel}
-        className="mb-6 px-6 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-      >
-        Download Full Lectures Report (Excel)
-      </button>
+    <div className="min-h-screen bg-white px-4 sm:px-6 lg:px-10 py-10">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-3xl md:text-4xl font-bold text-red-700 mb-8 text-center">
+          Lecture Reports
+        </h1>
 
-      {/* Optional preview */}
-      <div className="overflow-auto max-h-96 border p-4 bg-white rounded shadow">
-        {lectures.length === 0 ? (
-          <p>No lectures found.</p>
-        ) : (
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-gray-300">
-                <th className="py-2 px-4">Teacher</th>
-                <th className="py-2 px-4">Venue</th>
-                <th className="py-2 px-4">Class</th>
-                <th className="py-2 px-4">Time</th>
-                <th className="py-2 px-4">Strength</th>
-                <th className="py-2 px-4">Resource Person</th>
-                <th className="py-2 px-4">Company</th>
-                <th className="py-2 px-4">Location</th>
-                <th className="py-2 px-4">Designation</th>
-                <th className="py-2 px-4">Topic</th>
-              </tr>
-            </thead>
-            <tbody>
-              {lectures.map((lec) => (
-                <tr key={lec._id} className="border-b border-gray-200">
-                  <td className="py-2 px-4">{lec.teacher}</td>
-                  <td className="py-2 px-4">{lec.venue}</td>
-                  <td className="py-2 px-4">{lec.class}</td>
-                  <td className="py-2 px-4">{lec.time}</td>
-                  <td className="py-2 px-4">{lec.strength}</td>
-                  <td className="py-2 px-4">{lec.resourcePerson}</td>
-                  <td className="py-2 px-4">{lec.company}</td>
-                  <td className="py-2 px-4">{lec.location}</td>
-                  <td className="py-2 px-4">{lec.designation}</td>
-                  <td className="py-2 px-4">{lec.topic}</td>
+        <div className="flex justify-center mb-6">
+          <button
+            onClick={downloadExcel}
+            className="bg-red-600 hover:bg-red-700 text-white font-medium px-6 py-2 rounded-md transition duration-200"
+          >
+            Download Full Lectures Report (Excel)
+          </button>
+        </div>
+
+        <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
+          {lectures.length === 0 ? (
+            <p className="p-4 text-gray-500">No lectures found.</p>
+          ) : (
+            <table className="min-w-full bg-white text-sm text-gray-800">
+              <thead className="bg-gray-100 text-xs uppercase sticky top-0 z-10">
+                <tr>
+                  {[
+                    "Teacher",
+                    "Venue",
+                    "Class",
+                    "Time",
+                    "Strength",
+                    "Resource Person",
+                    "Company",
+                    "Location",
+                    "Designation",
+                    "Topic",
+                  ].map((heading) => (
+                    <th
+                      key={heading}
+                      className="px-4 py-3 text-left whitespace-nowrap font-semibold border-b"
+                    >
+                      {heading}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+              </thead>
+              <tbody>
+                {lectures.map((lec, idx) => (
+                  <tr
+                    key={lec._id || idx}
+                    className="even:bg-gray-50 border-b last:border-none"
+                  >
+                    <td className="px-4 py-2 whitespace-nowrap">{lec.teacher}</td>
+                    <td className="px-4 py-2 whitespace-nowrap">{lec.venue}</td>
+                    <td className="px-4 py-2 whitespace-nowrap">{lec.class}</td>
+                    <td className="px-4 py-2 whitespace-nowrap">{lec.time}</td>
+                    <td className="px-4 py-2 whitespace-nowrap">{lec.strength}</td>
+                    <td className="px-4 py-2 whitespace-nowrap">{lec.resourcePerson}</td>
+                    <td className="px-4 py-2 whitespace-nowrap">{lec.company}</td>
+                    <td className="px-4 py-2 whitespace-nowrap">{lec.location}</td>
+                    <td className="px-4 py-2 whitespace-nowrap">{lec.designation}</td>
+                    <td className="px-4 py-2 whitespace-nowrap">{lec.topic}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -20,28 +20,40 @@ export default function Sidebar() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const toggleManage = () => setOpenManage((prev) => !prev);
-
-  // Helper to check if link is active
   const isActive = (path) => location.pathname === path;
 
   return (
     <>
-      {/* Mobile toggle button */}
-      <button
-        aria-label="Toggle sidebar"
-        onClick={() => setSidebarOpen((v) => !v)}
-        className="md:hidden fixed top-4 left-4 z-50 bg-white p-2 rounded-md shadow-md text-red-600 focus:outline-none focus:ring-2 focus:ring-red-600"
-      >
-        {sidebarOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
-      </button>
+      {/* === TOP BAR for Mobile (Logo + Toggle) === */}
+      <div className="md:hidden fixed top-0 left-0 w-full z-50 bg-white border-b border-gray-200 flex items-center justify-between px-4 py-3 shadow-sm">
+        <div className="flex items-center gap-3">
+          <img
+            src="https://tse3.mm.bing.net/th/id/OIP.8QJtVK0wbirPqNFnD6ebWQHaHa?cb=thfc1&rs=1&pid=ImgDetMain&o=7&rm=3"
+            alt="PCTE Logo"
+            className="w-10 h-10 rounded-full border border-gray-300 shadow-sm"
+          />
+          <div>
+            <h2 className="font-semibold text-base">PCTE</h2>
+            <p className="text-gray-600 text-xs">LUDHIANA</p>
+          </div>
+        </div>
 
-      {/* Sidebar */}
+        <button
+          aria-label="Toggle sidebar"
+          onClick={() => setSidebarOpen((v) => !v)}
+          className="text-red-600 focus:outline-none focus:ring-2 focus:ring-red-600"
+        >
+          {sidebarOpen ? <FaTimes size={22} /> : <FaBars size={22} />}
+        </button>
+      </div>
+
+      {/* === Sidebar === */}
       <aside
         className={`fixed top-0 left-0 h-full w-64 bg-gradient-to-b from-white to-gray-50 border-r border-gray-200 flex flex-col shadow-lg transition-transform duration-300 ease-in-out
-        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 md:static z-40`}
+        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 md:static z-40 pt-16 md:pt-0`}
       >
-        {/* Logo */}
-        <div className="flex items-center gap-3 p-4 border-b border-gray-200">
+        {/* Desktop Logo (hidden on mobile) */}
+        <div className="hidden md:flex items-center gap-3 p-4 border-b border-gray-200">
           <img
             src="https://tse3.mm.bing.net/th/id/OIP.8QJtVK0wbirPqNFnD6ebWQHaHa?cb=thfc1&rs=1&pid=ImgDetMain&o=7&rm=3"
             alt="PCTE Logo"
@@ -53,12 +65,11 @@ export default function Sidebar() {
           </div>
         </div>
 
-        {/* Menu */}
+        {/* Navigation Menu */}
         <nav className="flex flex-col gap-1 flex-1 mt-2 overflow-y-auto">
           <Link
             to="/"
-            className={`flex items-center gap-3 px-5 py-3 mx-2 rounded-md font-medium
-            ${
+            className={`flex items-center gap-3 px-5 py-3 mx-2 rounded-md font-medium ${
               isActive("/")
                 ? "bg-red-100 text-red-600 font-semibold shadow-sm"
                 : "text-gray-700 hover:bg-gray-50"
@@ -92,40 +103,24 @@ export default function Sidebar() {
               <li>
                 <Link
                   to="/add-lecture"
-                  className={`flex items-center gap-2 px-4 py-2 text-sm rounded-md
-                    ${
-                      isActive("/add-lecture")
-                        ? "bg-red-100 text-red-600 font-semibold"
-                        : "text-gray-700 hover:bg-gray-50"
-                    }`}
+                  className={`flex items-center gap-2 px-4 py-2 text-sm rounded-md ${
+                    isActive("/add-lecture")
+                      ? "bg-red-100 text-red-600 font-semibold"
+                      : "text-gray-700 hover:bg-gray-50"
+                  }`}
                   onClick={() => setSidebarOpen(false)}
                 >
                   <FaPlus className="text-gray-500" />
                   Add Lectures
                 </Link>
               </li>
-              <li>
-                <Link
-                  to="/edit-lecture"
-                  className={`flex items-center gap-2 px-4 py-2 text-sm rounded-md
-                    ${
-                      isActive("/edit-lecture")
-                        ? "bg-red-100 text-red-600 font-semibold"
-                        : "text-gray-700 hover:bg-gray-50"
-                    }`}
-                  onClick={() => setSidebarOpen(false)}
-                >
-                  <FaEdit className="text-gray-500" />
-                  Edit Lectures
-                </Link>
-              </li>
+              
             </ul>
           </div>
 
           <Link
             to="/view-lectures"
-            className={`flex items-center gap-3 px-5 py-3 mx-2 rounded-md font-medium
-            ${
+            className={`flex items-center gap-3 px-5 py-3 mx-2 rounded-md font-medium ${
               isActive("/view-lectures")
                 ? "bg-red-100 text-red-600 font-semibold shadow-sm"
                 : "text-gray-700 hover:bg-gray-50"
@@ -138,8 +133,7 @@ export default function Sidebar() {
 
           <Link
             to="/upload-attendance"
-            className={`flex items-center gap-3 px-5 py-3 mx-2 rounded-md font-medium
-            ${
+            className={`flex items-center gap-3 px-5 py-3 mx-2 rounded-md font-medium ${
               isActive("/upload-attendance")
                 ? "bg-red-100 text-red-600 font-semibold shadow-sm"
                 : "text-gray-700 hover:bg-gray-50"
@@ -152,8 +146,7 @@ export default function Sidebar() {
 
           <Link
             to="/report"
-            className={`flex items-center gap-3 px-5 py-3 mx-2 rounded-md font-medium
-            ${
+            className={`flex items-center gap-3 px-5 py-3 mx-2 rounded-md font-medium ${
               isActive("/report")
                 ? "bg-red-100 text-red-600 font-semibold shadow-sm"
                 : "text-gray-700 hover:bg-gray-50"

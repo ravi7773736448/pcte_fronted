@@ -18,46 +18,49 @@ const ViewLectures = () => {
   }, []);
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
-      <h2 className="text-4xl font-bold mb-8 text-red-700 select-none">
+    <div className="min-h-screen bg-gray-50 px-4 py-20 sm:px-6 lg:px-12">
+      <h2 className="text-3xl sm:text-4xl font-bold mb-10 text-red-700 text-center md:text-left select-none">
         View Guest Lectures
       </h2>
 
       {lectures.length === 0 ? (
-        <p className="text-gray-600">No lectures available.</p>
+        <p className="text-gray-600 text-center">No lectures available.</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {lectures.map((lecture, idx) => (
             <div
               key={idx}
-              className="bg-white rounded-lg shadow-md border border-gray-200 p-6 flex flex-col"
+              className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col hover:shadow-lg transition-shadow duration-300"
             >
-              <h3 className="text-2xl font-semibold text-red-700 mb-4">{lecture.topic}</h3>
+              <h3 className="text-xl font-semibold text-red-700 mb-4 break-words line-clamp-2">
+                {lecture.topic}
+              </h3>
 
-              <div className="space-y-2 flex-grow text-gray-800">
+              <div className="space-y-2 flex-grow text-gray-800 text-sm sm:text-base">
                 <p>
-                  <span className="font-semibold">Teacher:</span> {lecture.teacher}
+                  <span className="font-semibold">Teacher:</span> {lecture.teacher || 'N/A'}
                 </p>
                 <p>
-                  <span className="font-semibold">Venue:</span> {lecture.venue}
+                  <span className="font-semibold">Venue:</span> {lecture.venue || 'N/A'}
                 </p>
                 <p>
-                  <span className="font-semibold">Class:</span> {lecture.class}
+                  <span className="font-semibold">Class:</span> {lecture.class || 'N/A'}
                 </p>
                 <p>
-                  <span className="font-semibold">Time:</span> {lecture.time}
+                  <span className="font-semibold">Time:</span> {lecture.time || 'N/A'}
                 </p>
                 <p>
-                  <span className="font-semibold">Strength:</span> {lecture.strength}
+                  <span className="font-semibold">Strength:</span> {lecture.strength || 'N/A'}
                 </p>
                 <p>
-                  <span className="font-semibold">Speaker:</span> {lecture.resourcePerson} ({lecture.designation})
+                  <span className="font-semibold">Speaker:</span>{' '}
+                  {lecture.resourcePerson || 'N/A'} ({lecture.designation || 'N/A'})
                 </p>
                 <p>
-                  <span className="font-semibold">Company:</span> {lecture.company}
+                  <span className="font-semibold">Company:</span> {lecture.company || 'N/A'}
                 </p>
                 <p>
-                  <span className="font-semibold">Location:</span> {lecture.location}
+                  <span className="font-semibold">Location:</span> {lecture.location || 'N/A'}
                 </p>
               </div>
 
