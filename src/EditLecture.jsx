@@ -1,13 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
 
-export default function EditLecture() {
+const EditLecture = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
+  const [loading, setLoading] = useState(true);
+  const [lecture, setLecture] = useState({
     teacher: "",
     venue: "",
     class: "",
@@ -18,47 +19,46 @@ export default function EditLecture() {
     location: "",
     designation: "",
     topic: "",
+    date: "",
   });
 
-  const [bannerPreview, setBannerPreview] = useState("");
-  const [bannerFile, setBannerFile] = useState(null);
-
-  const [imagesPreview, setImagesPreview] = useState("");
-  const [imagesFile, setImagesFile] = useState(null);
-
-  const [loading, setLoading] = useState(true);
+  const [banner, setBanner] = useState(null);
+  const [images, setImages] = useState(null);
+  const [previewBanner, setPreviewBanner] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
 
   useEffect(() => {
     const fetchLecture = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/lectures/${id}`);
-        if (!res.ok) throw new Error("Failed to fetch lecture");
-        const data = await res.json();
+        const res = await axios.get(`https://pcte-guest-backend-1.onrender.com/api/lectures/${id}`);
+        const lec = res.data;
 
-        setFormData({
-          teacher: data.teacher || "",
-          venue: data.venue || "",
-          class: data.class || "",
-          time: data.time || "",
-          strength: data.strength || "",
-          resourcePerson: data.resourcePerson || "",
-          company: data.company || "",
-          location: data.location || "",
-          designation: data.designation || "",
-          topic: data.topic || "",
+        setLecture({
+          teacher: lec.teacher || "",
+          venue: lec.venue || "",
+          class: lec.class || "",
+          time: lec.time || "",
+          strength: lec.strength || "",
+          resourcePerson: lec.resourcePerson || "",
+          company: lec.company || "",
+          location: lec.location || "",
+          designation: lec.designation || "",
+          topic: lec.topic || "",
+          date: lec.date ? new Date(lec.date).toISOString().split("T")[0] : "",
         });
 
-        setBannerPreview(
-          data.banner ? `http://localhost:5000/uploads/${data.banner}` : ""
-        );
+        if (lec.banner) {
+          setPreviewBanner(`https://pcte-guest-backend-1.onrender.com/uploads/${lec.banner}?t=${Date.now()}`);
+        }
 
-        setImagesPreview(
-          data.images ? `http://localhost:5000/uploads/${data.images}` : ""
-        );
+        if (lec.images) {
+          setPreviewImage(`https://pcte-guest-backend-1.onrender.com/${lec.images}?t=${Date.now()}`);
+        }
+
+        setLoading(false);
       } catch (err) {
-        console.error("Error fetching lecture:", err);
-        toast.error("Failed to load lecture data");
-      } finally {
+        toast.error("Failed to fetch lecture details");
+        console.error(err);
         setLoading(false);
       }
     };
@@ -67,115 +67,135 @@ export default function EditLecture() {
   }, [id]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setLecture({ ...lecture, [e.target.name]: e.target.value });
   };
 
   const handleBannerChange = (e) => {
     const file = e.target.files[0];
-    setBannerFile(file);
-    if (file) {
-      setBannerPreview(URL.createObjectURL(file));
-    }
+    setBanner(file);
+    setPreviewBanner(file ? URL.createObjectURL(file) : null);
   };
 
-  const handleImagesChange = (e) => {
+  const handleImageChange = (e) => {
     const file = e.target.files[0];
-    setImagesFile(file);
-    if (file) {
-      setImagesPreview(URL.createObjectURL(file));
-    }
+    setImages(file);
+    setPreviewImage(file ? URL.createObjectURL(file) : null);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const formData = new FormData();
 
-    const updatedData = new FormData();
-    for (const key in formData) {
-      updatedData.append(key, formData[key]);
-    }
+    Object.entries(lecture).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
 
-    if (bannerFile) updatedData.append("banner", bannerFile);
-    if (imagesFile) updatedData.append("images", imagesFile);
+    if (banner) formData.append("banner", banner);
+    if (images) formData.append("images", images);
 
     try {
-      const res = await fetch(`http://localhost:5000/api/lectures/${id}`, {
-        method: "PUT",
-        body: updatedData,
+      await axios.put(`https://pcte-guest-backend-1.onrender.com/api/lectures/${id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Failed to update lecture");
-      }
-
-      toast.success("Lecture updated successfully!");
-      setTimeout(() => navigate("/"), 2000); // Delay to let user see toast
-    } catch (error) {
-      console.error("Update failed:", error);
-      toast.error("Update failed: " + error.message);
+      toast.success("Lecture updated successfully");
+      navigate("/view-lectures");
+    } catch (err) {
+      toast.error("Failed to update lecture");
+      console.error(err);
     }
   };
 
-  if (loading) {
-    return <p className="p-6 text-red-700 font-bold">Loading...</p>;
-  }
+  if (loading) return <p className="p-4">Loading lecture details...</p>;
 
   return (
-    <div className="min-h-screen bg-white p-10">
-      <ToastContainer position="top-right" autoClose={3000} />
-      <h2 className="text-3xl font-bold text-[#C10007] mb-8">Edit Guest Lecture</h2>
-      <form
-        onSubmit={handleSubmit}
-        className="border-2 border-red-700 p-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-white rounded"
-      >
-        <div>
-          <label className="block mb-1 font-semibold">Teacher:</label>
-          <input name="teacher" value={formData.teacher} onChange={handleChange} className="w-full border p-2 mb-4" required />
-          <label className="block mb-1 font-semibold">Venue:</label>
-          <input name="venue" value={formData.venue} onChange={handleChange} className="w-full border p-2 mb-4" />
-          <label className="block mb-1 font-semibold">Class:</label>
-          <input name="class" value={formData.class} onChange={handleChange} className="w-full border p-2 mb-4" />
-          <label className="block mb-1 font-semibold">Time:</label>
-          <input name="time" value={formData.time} onChange={handleChange} className="w-full border p-2 mb-4" />
-          <label className="block mb-1 font-semibold">Strength:</label>
-          <input name="strength" type="number" value={formData.strength} onChange={handleChange} className="w-full border p-2 mb-4" />
-          <label className="block mb-1 font-semibold">Resource Person:</label>
-          <input name="resourcePerson" value={formData.resourcePerson} onChange={handleChange} className="w-full border p-2 mb-4" />
-          <label className="block mb-1 font-semibold">Company:</label>
-          <input name="company" value={formData.company} onChange={handleChange} className="w-full border p-2 mb-4" />
-          <label className="block mb-1 font-semibold">Location:</label>
-          <input name="location" value={formData.location} onChange={handleChange} className="w-full border p-2 mb-4" />
-          <label className="block mb-1 font-semibold">Designation:</label>
-          <input name="designation" value={formData.designation} onChange={handleChange} className="w-full border p-2 mb-4" />
-          <label className="block mb-1 font-semibold">Topic:</label>
-          <input name="topic" value={formData.topic} onChange={handleChange} className="w-full border p-2 mb-4" required />
-        </div>
+    <div className="p-6 max-w-4xl mx-auto">
+      <div className="bg-white shadow-lg rounded-2xl p-8 border">
+        <h2 className="text-3xl font-bold text-gray-800 mb-6">✏️ Edit Lecture</h2>
 
-        <div>
-          <label className="block mb-1 font-semibold">Event Banner (Main image):</label>
-          {bannerPreview ? (
-            <img src={bannerPreview} alt="Banner Preview" className="w-full h-40 object-cover mb-4 rounded" />
-          ) : (
-            <div className="w-full h-40 bg-gray-100 mb-4 flex items-center justify-center text-gray-500 rounded">No banner uploaded</div>
-          )}
-          <input type="file" accept="image/*" onChange={handleBannerChange} className="w-full border p-2 mb-6" />
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[
+              { name: "teacher", label: "Teacher" },
+              { name: "venue", label: "Venue" },
+              { name: "class", label: "Class" },
+              { name: "time", label: "Time" },
+              { name: "strength", label: "Strength" },
+              { name: "resourcePerson", label: "Resource Person" },
+              { name: "company", label: "Company" },
+              { name: "location", label: "Location" },
+              { name: "designation", label: "Designation" },
+              { name: "topic", label: "Topic" },
+              { name: "date", label: "Date", type: "date" },
+            ].map((field) => (
+              <div key={field.name}>
+                <label className="block mb-2 text-sm font-medium text-gray-700">
+                  {field.label}
+                </label>
+                <input
+                  type={field.type || "text"}
+                  name={field.name}
+                  value={lecture[field.name]}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 transition"
+                  required
+                />
+              </div>
+            ))}
+          </div>
 
-          <label className="block mb-1 font-semibold">Additional Photo (e.g. event capture):</label>
-          {imagesPreview ? (
-            <img src={imagesPreview} alt="Additional Images Preview" className="w-full h-40 object-cover mb-4 rounded" />
-          ) : (
-            <div className="w-full h-40 bg-gray-100 mb-4 flex items-center justify-center text-gray-500 rounded">No additional photo uploaded</div>
-          )}
-          <input type="file" accept="image/*" onChange={handleImagesChange} className="w-full border p-2" />
-        </div>
+          {/* Banner Image Upload */}
+          <div>
+            <label className="block mb-2 text-sm font-medium text-gray-700">Banner Image</label>
+            {previewBanner && (
+              <img
+                src={previewBanner}
+                alt="Banner"
+                className="w-40 h-28 object-cover rounded-lg mb-2 border"
+              />
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleBannerChange}
+              className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 
+              file:rounded-full file:border-0 file:text-sm file:font-semibold 
+              file:bg-red-50 file:text-red-600 hover:file:bg-red-100 cursor-pointer"
+            />
+          </div>
 
-        <div className="col-span-2 text-center mt-4">
-          <button type="submit" className="bg-[#C10007] text-white px-6 py-2 rounded hover:bg-[#990005]">
-            Update Lecture
-          </button>
-        </div>
-      </form>
+          {/* Lecture Image Upload */}
+          <div>
+            <label className="block mb-2 text-sm font-medium text-gray-700">Lecture Image</label>
+            {previewImage && (
+              <img
+                src={previewImage}
+                alt="Lecture"
+                className="w-40 h-28 object-cover rounded-lg mb-2 border"
+              />
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 
+              file:rounded-full file:border-0 file:text-sm file:font-semibold 
+              file:bg-red-50 file:text-red-600 hover:file:bg-red-100 cursor-pointer"
+            />
+          </div>
+
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-medium transition-all shadow-md hover:shadow-lg"
+            >
+              ✅ Update Lecture
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
-}
+};
+
+export default EditLecture;

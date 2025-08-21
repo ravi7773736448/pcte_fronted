@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   FaTachometerAlt,
   FaChalkboardTeacher,
@@ -8,19 +8,30 @@ import {
   FaFileAlt,
   FaSignOutAlt,
   FaPlus,
-  FaEdit,
   FaBars,
   FaTimes,
 } from "react-icons/fa";
 import { IoIosArrowDown, IoIosArrowForward } from "react-icons/io";
 
-export default function Sidebar() {
+export default function Sidebar({ onLogout }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const [openManage, setOpenManage] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const toggleManage = () => setOpenManage((prev) => !prev);
-  const isActive = (path) => location.pathname === path;
+
+  const isActive = (path) =>
+    location.pathname === path || location.pathname.startsWith(path + "/");
+
+  const handleLogout = () => {
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("isAuthenticated");
+
+    if (onLogout) onLogout();
+
+    navigate("/admin-login");
+  };
 
   return (
     <>
@@ -41,7 +52,7 @@ export default function Sidebar() {
         <button
           aria-label="Toggle sidebar"
           onClick={() => setSidebarOpen((v) => !v)}
-          className="text-red-600 focus:outline-none focus:ring-2 focus:ring-red-600"
+          className="text-[#9B1C1C] focus:outline-none focus:ring-2 focus:ring-[#9B1C1C]"
         >
           {sidebarOpen ? <FaTimes size={22} /> : <FaBars size={22} />}
         </button>
@@ -68,10 +79,10 @@ export default function Sidebar() {
         {/* Navigation Menu */}
         <nav className="flex flex-col gap-1 flex-1 mt-2 overflow-y-auto">
           <Link
-            to="/"
+            to="/dashboard"
             className={`flex items-center gap-3 px-5 py-3 mx-2 rounded-md font-medium ${
-              isActive("/")
-                ? "bg-red-100 text-red-600 font-semibold shadow-sm"
+              isActive("/dashboard")
+                ? "bg-[#9B1C1C] text-[#fff] font-semibold shadow-sm"
                 : "text-gray-700 hover:bg-gray-50"
             }`}
             onClick={() => setSidebarOpen(false)}
@@ -105,7 +116,7 @@ export default function Sidebar() {
                   to="/add-lecture"
                   className={`flex items-center gap-2 px-4 py-2 text-sm rounded-md ${
                     isActive("/add-lecture")
-                      ? "bg-red-100 text-red-600 font-semibold"
+                      ? "bg-[#9B1C1C] text-[#fff] font-semibold"
                       : "text-gray-700 hover:bg-gray-50"
                   }`}
                   onClick={() => setSidebarOpen(false)}
@@ -114,7 +125,20 @@ export default function Sidebar() {
                   Add Lectures
                 </Link>
               </li>
-              
+              <li>
+                <Link
+                  to="/edit-lectures"
+                  className={`flex items-center gap-2 px-4 py-2 text-sm rounded-md ${
+                    isActive("/edit-lectures")
+                      ? "bg-[#9B1C1C] text-[#fff] font-semibold"
+                      : "text-gray-700 hover:bg-gray-50"
+                  }`}
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <FaChalkboardTeacher className="text-gray-500" />
+                  Edit Lectures
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -122,7 +146,7 @@ export default function Sidebar() {
             to="/view-lectures"
             className={`flex items-center gap-3 px-5 py-3 mx-2 rounded-md font-medium ${
               isActive("/view-lectures")
-                ? "bg-red-100 text-red-600 font-semibold shadow-sm"
+                ? "bg-[#9B1C1C] text-[#fff] font-semibold shadow-sm"
                 : "text-gray-700 hover:bg-gray-50"
             }`}
             onClick={() => setSidebarOpen(false)}
@@ -131,11 +155,25 @@ export default function Sidebar() {
             View Lectures
           </Link>
 
+          {/* === New Approval Requests Link === */}
+          <Link
+            to="/approval-requests"
+            className={`flex items-center gap-3 px-5 py-3 mx-2 rounded-md font-medium ${
+              isActive("/approval-requests")
+                ? "bg-[#9B1C1C] text-[#fff] font-semibold shadow-sm"
+                : "text-gray-700 hover:bg-gray-50"
+            }`}
+            onClick={() => setSidebarOpen(false)}
+          >
+            <FaChalkboardTeacher className="text-lg" />
+            Approval Requests
+          </Link>
+
           <Link
             to="/upload-attendance"
             className={`flex items-center gap-3 px-5 py-3 mx-2 rounded-md font-medium ${
               isActive("/upload-attendance")
-                ? "bg-red-100 text-red-600 font-semibold shadow-sm"
+                ? "bg-[#9B1C1C] text-[#fff] font-semibold shadow-sm"
                 : "text-gray-700 hover:bg-gray-50"
             }`}
             onClick={() => setSidebarOpen(false)}
@@ -148,7 +186,7 @@ export default function Sidebar() {
             to="/report"
             className={`flex items-center gap-3 px-5 py-3 mx-2 rounded-md font-medium ${
               isActive("/report")
-                ? "bg-red-100 text-red-600 font-semibold shadow-sm"
+                ? "bg-[#9B1C1C] text-[#fff] font-semibold shadow-sm"
                 : "text-gray-700 hover:bg-gray-50"
             }`}
             onClick={() => setSidebarOpen(false)}
@@ -160,7 +198,10 @@ export default function Sidebar() {
 
         {/* Footer */}
         <div className="border-t border-gray-200 p-4">
-          <button className="flex items-center gap-2 text-red-600 font-medium hover:bg-red-50 w-full px-3 py-2 rounded-md transition-all duration-200">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 text-[#fff] font-medium hover:bg-red-50 w-full px-3 py-2 rounded-md transition-all duration-200"
+          >
             <FaSignOutAlt />
             Logout
           </button>

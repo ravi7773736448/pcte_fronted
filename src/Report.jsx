@@ -7,17 +7,19 @@ export default function Report() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/lectures")
-      .then((res) => res.json())
-      .then((data) => {
-        setLectures(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Failed to fetch lectures:", err);
-        setLoading(false);
-      });
-  }, []);
+  fetch("https://pcte-guest-backend-1.onrender.com/api/lectures")
+    .then((res) => res.json())
+    .then((data) => {
+      const attendedLectures = data.filter(lec => lec.attendanceMarked);
+      setLectures(attendedLectures);
+      setLoading(false);
+    })
+    .catch((err) => {
+      console.error("Failed to fetch lectures:", err);
+      setLoading(false);
+    });
+}, []);
+
 
   const downloadExcel = () => {
     if (lectures.length === 0) {

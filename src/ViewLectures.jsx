@@ -3,11 +3,12 @@ import axios from 'axios';
 
 const ViewLectures = () => {
   const [lectures, setLectures] = useState([]);
+  const [expandedCard, setExpandedCard] = useState(null); // Track expanded card
 
   useEffect(() => {
     const fetchLectures = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/lectures');
+        const res = await axios.get('https://pcte-guest-backend-1.onrender.com/api/lectures');
         setLectures(res.data);
       } catch (err) {
         console.error('Error fetching lectures:', err);
@@ -17,81 +18,92 @@ const ViewLectures = () => {
     fetchLectures();
   }, []);
 
+  const handleCardClick = (idx) => {
+    setExpandedCard(expandedCard === idx ? null : idx); // Toggle expand
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-20 sm:px-6 lg:px-12">
-      <h2 className="text-3xl sm:text-4xl font-bold mb-10 text-red-700 text-center md:text-left select-none">
-        View Guest Lectures
-      </h2>
+    <div className="min-h-screen bg-gray-50 pt-20 pb-12 overflow-x-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 className="text-3xl font-bold mb-14 text-red-700 text-center">
+          View Guest Lectures
+        </h2>
 
-      {lectures.length === 0 ? (
-        <p className="text-gray-600 text-center">No lectures available.</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {lectures.map((lecture, idx) => (
-            <div
-              key={idx}
-              className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col hover:shadow-lg transition-shadow duration-300"
-            >
-              <h3 className="text-xl font-semibold text-red-700 mb-4 break-words line-clamp-2">
-                {lecture.topic}
-              </h3>
+        {lectures.length === 0 ? (
+          <p className="text-center text-gray-600 text-lg">No lectures available.</p>
+        ) : (
+          <div
+            className={`grid gap-8 max-w-[1280px] mx-auto ${
+              lectures.length === 1
+                ? 'grid-cols-1 justify-items-center max-w-xl mx-auto'
+                : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
+            }`}
+          >
+            {lectures.map((lecture, idx) => {
+              const isExpanded = expandedCard === idx;
 
-              <div className="space-y-2 flex-grow text-gray-800 text-sm sm:text-base">
-                <p>
-                  <span className="font-semibold">Teacher:</span> {lecture.teacher || 'N/A'}
-                </p>
-                <p>
-                  <span className="font-semibold">Venue:</span> {lecture.venue || 'N/A'}
-                </p>
-                <p>
-                  <span className="font-semibold">Class:</span> {lecture.class || 'N/A'}
-                </p>
-                <p>
-                  <span className="font-semibold">Time:</span> {lecture.time || 'N/A'}
-                </p>
-                <p>
-                  <span className="font-semibold">Strength:</span> {lecture.strength || 'N/A'}
-                </p>
-                <p>
-                  <span className="font-semibold">Speaker:</span>{' '}
-                  {lecture.resourcePerson || 'N/A'} ({lecture.designation || 'N/A'})
-                </p>
-                <p>
-                  <span className="font-semibold">Company:</span> {lecture.company || 'N/A'}
-                </p>
-                <p>
-                  <span className="font-semibold">Location:</span> {lecture.location || 'N/A'}
-                </p>
-              </div>
+              return (
+                <div
+                  key={lecture.id || idx}
+                  className="bg-white rounded-3xl shadow-lg border border-gray-100 p-4 cursor-pointer hover:shadow-xl hover:scale-[1.02] transition-all duration-300 ease-in-out group"
+                  onClick={() => handleCardClick(idx)}
+                >
+                  {/* Banner */}
+                  {lecture.banner && (
+                    <div className="aspect-w-16 aspect-h-9 w-full overflow-hidden rounded-lg border border-gray-200 shadow mb-4">
+                      <img
+                        src={`https://pcte-guest-backend-1.onrender.com/uploads/${lecture.banner}`}
+                        alt="Banner"
+                        className="object-cover w-full h-full transition-transform duration-300 ease-in-out group-hover:scale-105"
+                      />
+                    </div>
+                  )}
 
-              {/* Images */}
-              {lecture.images && (
-                <div className="mt-6">
-                  <p className="font-semibold mb-2">Image:</p>
-                  <img
-                    src={`http://localhost:5000/uploads/${lecture.images}`}
-                    alt="Lecture"
-                    className="w-full h-48 object-cover rounded-md border border-gray-300 shadow-sm"
-                  />
+                  {/* Topic */}
+                  <h3 className="text-xl font-semibold text-red-700 mb-2 text-center">
+                    {lecture.topic}
+                  </h3>
+
+                  {/* Guest Speaker */}
+                  <p className="text-center text-sm text-gray-600 mb-4">
+                    🎤 {lecture.resourcePerson} ({lecture.designation})
+                  </p>
+
+                  {/* Expanded Full Details */}
+                  {isExpanded && (
+                    <div className="mt-4 text-sm text-gray-700 space-y-2">
+                      <p><span className="font-semibold">👨‍🏫 Teacher:</span> {lecture.teacher || 'N/A'}</p>
+                      <p><span className="font-semibold">🏫 Venue:</span> {lecture.venue || 'N/A'}</p>
+                      <p><span className="font-semibold">📚 Class:</span> {lecture.class || 'N/A'}</p>
+                      <p><span className="font-semibold">⏰ Time:</span> {lecture.time || 'N/A'}</p>
+                      <p><span className="font-semibold">👥 Strength:</span> {lecture.strength || 'N/A'}</p>
+                      <p><span className="font-semibold">🏢 Company:</span> {lecture.company || 'N/A'}</p>
+                      <p><span className="font-semibold">📍 Location:</span> {lecture.location || 'N/A'}</p>
+
+                      {/* Lecture Image */}
+                      {lecture.images && (
+                        <div>
+                          <p className="font-semibold mt-4">Image</p>
+                          <div className="aspect-w-16 aspect-h-9 w-full overflow-hidden rounded-lg border border-gray-200 shadow">
+                            <img
+                              src={`https://pcte-guest-backend-1.onrender.com/uploads/${lecture.images}`}
+                              alt="Lecture"
+                              className="object-cover w-full h-full transition-transform duration-300 ease-in-out group-hover:scale-105"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
-              )}
-
-              {lecture.banner && (
-                <div className="mt-6">
-                  <p className="font-semibold mb-2">Banner:</p>
-                  <img
-                    src={`http://localhost:5000/uploads/${lecture.banner}`}
-                    alt="Banner"
-                    className="w-full h-48 object-cover rounded-md border border-gray-300 shadow-sm"
-                  />
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
 export default ViewLectures;
+ 
