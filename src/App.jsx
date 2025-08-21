@@ -19,7 +19,7 @@ import AddLecture from "./AddLecture";
 import EditLecture from "./EditLecture";
 import ViewLectures from "./ViewLectures";
 import LectureDetails from "./components/LectureDetails";
-import FeedbackForm from "./components/feedbackForm";
+
 import Report from "./Report";
 import UploadClassAttendance from "./UploadClassAttendance";
 import RequestLecture from "./components/RequestLecture";
@@ -72,7 +72,6 @@ function AppWrapper() {
           <Route path="/student-dashboard" element={<StudentDashboard />} />
           <Route path="/student-view-lectures" element={<ViewLectures />} />
           <Route path="/student-view-lecture-details" element={<LectureDetails />} />
-          <Route path="/student-feedback" element={<FeedbackForm />} />
           <Route path="/student/request-lecture" element={<RequestLecture />} />
 
           {/* Admin routes (protected) */}
